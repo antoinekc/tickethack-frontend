@@ -53,3 +53,31 @@ document.querySelectorAll('.add-to-cart-btn').forEach( button => {
   })
 })
 
+document.getElementById('searchButton').addEventListener('click', function() {
+  fetch('/api/trains')
+      .then(response => response.json())
+      .then(data => {
+          const trainList = document.getElementById('trainList');
+          trainList.innerHTML = ''; 
+
+          data.forEach(train => {
+              const trainItem = document.createElement('div');
+              trainItem.className = 'train-item';
+
+              trainItem.innerHTML = `
+                  <span>${train.depart} > ${train.arrivee}</span>
+                  <span>${train.heure}</span>
+                  <span>${train.prix}€</span>
+                  <button class="book-button">Book</button>
+              `;
+
+              trainList.appendChild(trainItem);
+          });
+
+          trainList.style.display = 'block'; // Show the list
+      })
+      .catch(error => {
+          console.error('Error fetching train data:', error);
+      });
+});
+
