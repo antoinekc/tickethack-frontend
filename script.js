@@ -1,5 +1,5 @@
 // Fonction pour ajouter un trajet au panier
-function addToCart(tripId) {
+/*function addToCart(tripId) {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   localStorage.setItem("cart", JSON.stringify([...cart, tripId]));
   alert(`Voyage ${tripId} ajouté au panier`)
@@ -51,33 +51,53 @@ document.querySelectorAll('.add-to-cart-btn').forEach( button => {
     const tripId = this.getAttribute('data-trip-id');
     addToCart(tripId)
   })
-})
+})*/
 
-document.getElementById('searchButton').addEventListener('click', function() {
-  fetch('/api/trains')
-      .then(response => response.json())
-      .then(data => {
-          const trainList = document.getElementById('trainList');
-          trainList.innerHTML = ''; 
+document.getElementById('searchForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const departure = document.getElementById('departure').value;
+  const arrival = document.getElementById('arrival').value;
+  const date = document.getElementById('date').value;
 
-          data.forEach(train => {
-              const trainItem = document.createElement('div');
-              trainItem.className = 'train-item';
+  try {
+    const response = await fetch(`http://localhost:3000/trips/search?departure=${departure}&arrival=${arrival}&date=${date}`);
+    const result = await response.json();
 
-              trainItem.innerHTML = `
-                  <span>${train.depart} > ${train.arrivee}</span>
-                  <span>${train.heure}</span>
-                  <span>${train.prix}€</span>
-                  <button class="book-button">Book</button>
-              `;
+    const trainListDiv = document.getElementById('trainList');
+    trainListDiv.innerHTML = ""; // Réinitialiser la liste des trains
 
-              trainList.appendChild(trainItem);
-          });
+    if (response.ok) {
+      result.foundTrips.forEach(trip => {
+        const tripDiv = document.createElement('div');
+        tripDiv.className = "train-item"; // Utiliser "train-item"
 
-          trainList.style.display = 'block'; // Show the list
-      })
-      .catch(error => {
-          console.error('Error fetching train data:', error);
+        const tripDate = new Date(trip.date);
+        const formattedTime = tripDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        tripDiv.innerHTML = `
+          <span>${trip.departure} > ${trip.arrival}</span>
+          <div class="train-time-price">
+            <span>${formattedTime}</span>
+            <span>${trip.price} €</span>
+          </div>
+          <button class="book-button" data-trip-id="${trip._id}">Book</button>
+        `;
+
+        trainListDiv.appendChild(tripDiv);
       });
-});
 
+      // Ajouter des écouteurs d'événements aux boutons "Book"
+      document.querySelectorAll('.book-button').forEach(button => {
+        button.addEventListener('click', function () {
+          const tripId = this.getAttribute('data-trip-id');
+          addToCart(tripId);
+        });
+      });
+    } else {
+      trainListDiv.innerHTML = `<p>${result.message}</p>`;
+    }
+  } catch (error) {
+    console.error('Error fetching trips:', error);
+    document.getElementById('trainList').innerHTML = `<p>Server error. Please try again later.</p>`;
+  }
+});
