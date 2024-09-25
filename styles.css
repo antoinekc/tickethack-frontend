@@ -257,3 +257,12 @@ p {
   padding: 20px;
   justify-content: center;
 }
+
+/* section cart*/
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
