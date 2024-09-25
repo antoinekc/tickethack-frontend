@@ -175,6 +175,7 @@ p {
   justify-content: space-between; /* Aligne les éléments sur la même ligne */
   align-items: center; /* Centrer verticalement */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Ensure the train item takes full width */
 }
 
 .train-item p {
